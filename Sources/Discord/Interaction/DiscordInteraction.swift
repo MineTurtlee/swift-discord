@@ -83,13 +83,54 @@ public struct DiscordInteractionData: Codable, Hashable {
 public struct DiscordInteractionDataOption: Codable, Hashable {
     /// The name of the parameter.
     public var name: String
-
-    // TODO: Add this and type it property, e.g. using an enum that
-    //       encodes itself using an internally tagged representation.
-    //       See https://discord.com/developers/docs/interactions/slash-commands#application-command-object-application-command-option-type
-    // /// The value of the pair. Type is the OptionType of the command.
-    // public var value: Any?
-
+    
+    /// The type of the option (string, int, user, etc.)
+    public var type: Int
+    
+    /// The value provided by the user (if this is not a subcommand).
+    public var value: OptionValue?
+    
     /// Present if this option is a group or subcommand.
     public var options: [DiscordInteractionDataOption]?
+    
+    /// Wrapper for different possible value types.
+    public enum OptionValue: Codable, Hashable {
+        case string(String)
+        case int(Int)
+        case bool(Bool)
+        case double(Double)
+        case snowflake(String)
+        
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let s = try? container.decode(String.self) {
+                self = .string(s)
+            } else if let i = try? container.decode(Int.self) {
+                self = .int(i)
+            } else if let b = try? container.decode(Bool.self) {
+                self = .bool(b)
+            } else if let d = try? container.decode(Double.self) {
+                self = .double(d)
+            } else {
+                throw DecodingError.typeMismatch(
+                    OptionValue.self,
+                    DecodingError.Context(
+                        codingPath: decoder.codingPath,
+                        debugDescription: "Unsupported option value type"
+                    )
+                )
+            }
+        }
+        
+        public func encode(to encoder: Encoder) throws {
+            var container = encoder.singleValueContainer()
+            switch self {
+            case .string(let s): try container.encode(s)
+            case .int(let i): try container.encode(i)
+            case .bool(let b): try container.encode(b)
+            case .double(let d): try container.encode(d)
+            case .snowflake(let id): try container.encode(id)
+            }
+        }
+    }
 }
