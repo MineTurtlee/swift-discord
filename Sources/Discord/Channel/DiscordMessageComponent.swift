@@ -37,6 +37,7 @@ public struct DiscordMessageComponent: Codable, Hashable {
         case media
         case description
         case spoiler
+        case items
     }
 
     /// The type of the component.
@@ -77,6 +78,7 @@ public struct DiscordMessageComponent: Codable, Hashable {
     public var media: [String: String]?
     public var description: String?
     public var spoiler: Bool?
+    public var items: [DiscordMessageComponent]?
 
     /// Creates a new button component.
     /// Must be inside an action row.
@@ -188,6 +190,23 @@ public struct DiscordMessageComponent: Codable, Hashable {
             description: description,
             spoiler: spoiler
         )
+    }
+
+    public static func mediaGallery(items: [DiscordMessageComponent]) -> DiscordMessageComponent {
+        DiscordMessageComponent(
+            type: .mediaGallery,
+            items: items
+        )
+    }
+
+    public static func media(url: URL, description: String?, spoiler: Bool?) -> [String: Any?] {
+        [
+            "media": [
+                "url": url
+            ],
+            "description": description,
+            "spoiler": spoiler
+        ]
     }
 
     
