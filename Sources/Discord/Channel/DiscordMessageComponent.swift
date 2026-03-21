@@ -38,6 +38,9 @@ public struct DiscordMessageComponent: Codable, Hashable {
         case description
         case spoiler
         case items
+        case file
+        case spacing
+        case accent_color
     }
 
     /// The type of the component.
@@ -79,6 +82,12 @@ public struct DiscordMessageComponent: Codable, Hashable {
     public var description: String?
     public var spoiler: Bool?
     public var items: [DiscordMessageComponent]?
+    public var file: [String: String]?
+    // Separator
+    public var divider: Bool?
+    public var spacing: Int?
+    // Container
+    public var accent_color: Int?
 
     /// Creates a new button component.
     /// Must be inside an action row.
@@ -209,7 +218,37 @@ public struct DiscordMessageComponent: Codable, Hashable {
         ]
     }
 
-    
+    public static func file(file: String, spoiler: Bool?) -> DiscordMessageComponent {
+        DiscordMessageComponent(
+            type: .file,
+            spoiler: spoiler,
+            file: ["url": file]
+        )
+    }
+
+    public static func separator(visible: Bool?, large_spacing: Bool?) -> DiscordMessageComponent {
+        var padding: Int?
+        if (!large_spacing!) {
+            padding = 1
+        } else {
+            padding = 2
+        }
+
+        return DiscordMessageComponent(
+            type: .separator,
+            divider: visible,
+            spacing: padding
+        )
+    }
+
+    public static func container(components: [DiscordMessageComponent], accent_color: Int?, spoiler: Bool?) -> DiscordMessageComponent {
+        DiscordMessageComponent(
+            type: .container,
+            components: components,
+            spoiler: spoiler,
+            accent_color: accent_color
+        )
+    }
 }
 
 public struct DiscordMessageComponentType: RawRepresentable, Hashable, Codable {
@@ -229,11 +268,7 @@ public struct DiscordMessageComponentType: RawRepresentable, Hashable, Codable {
     public static let file = DiscordMessageComponentType(rawValue: 13)
     public static let separator = DiscordMessageComponentType(rawValue: 14)
     public static let container = DiscordMessageComponentType(rawValue: 17)
-    public static let label = DiscordMessageComponentType(rawValue: 18)
-    public static let fileUpload = DiscordMessageComponentType(rawValue: 19)
-    public static let radioGroup = DiscordMessageComponentType(rawValue: 21)
-    public static let checkboxGroup = DiscordMessageComponentType(rawValue: 22)
-    public static let checkbox = DiscordMessageComponentType(rawValue: 23)
+
 
     public init(rawValue: Int = 0) {
         self.rawValue = rawValue
