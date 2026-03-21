@@ -32,6 +32,11 @@ public struct DiscordMessageComponent: Codable, Hashable {
         case placeholder
         case minValues = "min_values"
         case maxValues = "max_values"
+        case accessory
+        case content
+        case media
+        case description
+        case spoiler
     }
 
     /// The type of the component.
@@ -64,6 +69,14 @@ public struct DiscordMessageComponent: Codable, Hashable {
     /// The maximum number of items that can be chosen, default 1,
     /// min 0, max 25
     public var maxValues: Int? = nil
+    // accessory!
+    public var accessory: [DiscordMessageComponent]?
+    // Content (textdisplay)
+    public var content: String?
+    // Mediaaa
+    public var media: [String: String]?
+    public var description: String?
+    public var spoiler: Bool?
 
     /// Creates a new button component.
     /// Must be inside an action row.
@@ -115,6 +128,69 @@ public struct DiscordMessageComponent: Codable, Hashable {
             components: components
         )
     }
+
+    public static func userSelect(placeholder: String?, minValues: Int?, maxValues: Int?, disabled: Bool?) -> DiscordMessageComponent {
+        DiscordMessageComponent(
+            type: .userSelect,
+            disabled: disabled,
+            minValues: minValues,
+            maxValues: maxValues
+        )
+    }
+
+    public static func roleSelect(placeholder: String?, minValues: Int?, maxValues: Int?, disabled: Bool?) -> DiscordMessageComponent {
+        DiscordMessageComponent(
+            type: .roleSelect,
+            disabled: disabled,
+            minValues: minValues,
+            maxValues: maxValues
+        )
+    }
+
+    public static func mentionableSelect(placeholder: String?, minValues: Int?, maxValues: Int?, disabled: Bool?) -> DiscordMessageComponent {
+        DiscordMessageComponent(
+            type: .mentionableSelect,
+            disabled: disabled,
+            minValues: minValues,
+            maxValues: maxValues
+        )
+    }
+
+    public static func channelSelect(placeholder: String?, minValues: Int?, maxValues: Int?, disabled: Bool?) -> DiscordMessageComponent {
+        DiscordMessageComponent(
+            type: .channelSelect,
+            disabled: disabled,
+            minValues: minValues,
+            maxValues: maxValues
+        )
+    }
+
+    // Section has this accessory thing which should in theory be Button or Thumbnail
+    public static func section(components: [DiscordMessageComponent], accessory: [DiscordMessageComponent]?) -> DiscordMessageComponent {
+        DiscordMessageComponent(
+            type: .section,
+            components: components,
+            accessory: accessory
+        )
+    }
+
+    public static func textDisplay(content: String) -> DiscordMessageComponent {
+        DiscordMessageComponent(
+            type: .textDisplay,
+            content: content
+        )
+    }
+
+    public static func thumbnail(media: URL, description: String?, spoiler: Bool?) -> DiscordMessageComponent {
+        DiscordMessageComponent(
+            type: .thumbnail,
+            media: ["url": media.absoluteString],
+            description: description,
+            spoiler: spoiler
+        )
+    }
+
+    
 }
 
 public struct DiscordMessageComponentType: RawRepresentable, Hashable, Codable {
@@ -123,8 +199,24 @@ public struct DiscordMessageComponentType: RawRepresentable, Hashable, Codable {
     public static let actionRow = DiscordMessageComponentType(rawValue: 1)
     public static let button = DiscordMessageComponentType(rawValue: 2)
     public static let selectMenu = DiscordMessageComponentType(rawValue: 3)
+    public static let userSelect = DiscordMessageComponentType(rawValue: 5)
+    public static let roleSelect = DiscordMessageComponentType(rawValue: 6)
+    public static let mentionableSelect = DiscordMessageComponentType(rawValue: 7)
+    public static let channelSelect = DiscordMessageComponentType(rawValue: 8)
+    public static let section = DiscordMessageComponentType(rawValue: 9)
+    public static let textDisplay = DiscordMessageComponentType(rawValue: 10)
+    public static let thumbnail = DiscordMessageComponentType(rawValue: 11)
+    public static let mediaGallery = DiscordMessageComponentType(rawValue: 12)
+    public static let file = DiscordMessageComponentType(rawValue: 13)
+    public static let separator = DiscordMessageComponentType(rawValue: 14)
+    public static let container = DiscordMessageComponentType(rawValue: 17)
+    public static let label = DiscordMessageComponentType(rawValue: 18)
+    public static let fileUpload = DiscordMessageComponentType(rawValue: 19)
+    public static let radioGroup = DiscordMessageComponentType(rawValue: 21)
+    public static let checkboxGroup = DiscordMessageComponentType(rawValue: 22)
+    public static let checkbox = DiscordMessageComponentType(rawValue: 23)
 
-    public init(rawValue: Int) {
+    public init(rawValue: Int = 0) {
         self.rawValue = rawValue
     }
 }
