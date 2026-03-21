@@ -73,16 +73,19 @@ public struct DiscordInteractionApplicationCommandCallbackData: Encodable {
     public let content: String?
     public let embeds: [DiscordEmbed]?
     public let allowedMentions: DiscordAllowedMentions?
+    public let components: [DiscordMessageComponent]?
 
     public init(
         tts: Bool? = nil,
         content: String? = nil,
         embeds: [DiscordEmbed]? = nil,
-        allowedMentions: DiscordAllowedMentions? = nil
+        allowedMentions: DiscordAllowedMentions? = nil,
+        components: [DiscordMessageComponent]? = nil
     ) {
         self.tts = tts
         self.content = content
         self.embeds = embeds
         self.allowedMentions = allowedMentions
+        self.components = components
     }
 }
