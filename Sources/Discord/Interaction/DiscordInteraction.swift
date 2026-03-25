@@ -49,7 +49,7 @@ public struct DiscordInteraction: Identifiable, Codable, Hashable {
     /// Read-only property, always 1
     public let version: Int
 
-    func deferInteraction(client: DiscordClient, interaction: DiscordInteraction) {
+    public func deferInteraction(client: DiscordClient, interaction: DiscordInteraction) {
         client.createInteractionResponse(
             for: interaction.id,
             token: interaction.token,
@@ -57,7 +57,7 @@ public struct DiscordInteraction: Identifiable, Codable, Hashable {
         )
     }
 
-    func editInteraction(client: DiscordClient, interaction: DiscordInteraction, data: DiscordMessage.Edit) {
+    public func editInteraction(client: DiscordClient, interaction: DiscordInteraction, data: DiscordMessage.Edit) {
         client.getWebhooks(forChannel: interaction.channelId) { webhooks, httpres in 
             var webhook: DiscordWebhook?
             for wh in webhooks {
