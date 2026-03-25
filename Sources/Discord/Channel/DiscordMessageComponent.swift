@@ -226,7 +226,7 @@ public struct DiscordMessageComponent: Codable, Hashable {
         )
     }
 
-    public static func separator(visible: Bool?, large_spacing: Bool?) -> DiscordMessageComponent {
+    public static func separator(visible: Bool? = true, large_spacing: Bool? = nil) -> DiscordMessageComponent {
         var padding: Int?
         if (!large_spacing!) {
             padding = 1
@@ -241,7 +241,7 @@ public struct DiscordMessageComponent: Codable, Hashable {
         )
     }
 
-    public static func container(components: [DiscordMessageComponent], accent_color: Int?, spoiler: Bool?) -> DiscordMessageComponent {
+    public static func container(components: [DiscordMessageComponent], accent_color: Int? = nil, spoiler: Bool? = nil) -> DiscordMessageComponent {
         DiscordMessageComponent(
             type: .container,
             components: components,

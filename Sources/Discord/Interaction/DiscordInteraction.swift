@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(FoundationNetworking)
+import FoundationNetworking
+#endif
 
 /// Represents a slash-command invocation by the user.
 public struct DiscordInteraction: Identifiable, Codable, Hashable {
@@ -45,6 +48,33 @@ public struct DiscordInteraction: Identifiable, Codable, Hashable {
 
     /// Read-only property, always 1
     public let version: Int
+
+    func deferInteraction(client: DiscordClient, interaction: DiscordInteraction) {
+        client.createInteractionResponse(
+            for: interaction.id,
+            token: interaction.token,
+            response: DiscordInteractionResponse(type: .deferredChannelMessageWithSource)
+        )
+    }
+
+    func editInteraction(client: DiscordClient, interaction: DiscordInteraction, data: DiscordMessage.Edit) {
+        client.getWebhooks(forChannel: interaction.channelId) { webhooks, httpres in 
+            var webhook: DiscordWebhook?
+            for wh in webhooks {
+                if wh.token == interaction.token {
+                    webhook = wh
+                }
+            }
+
+            guard let webhook = webhook else { return }
+
+            client.editMessage(
+                webhook.id,
+                on: interaction.channelId,
+                edit: data
+            )
+        }
+    }
 }
 
 public struct DiscordInteractionType: RawRepresentable, Hashable, Codable {
