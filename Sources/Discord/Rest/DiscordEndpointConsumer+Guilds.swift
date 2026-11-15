@@ -460,7 +460,7 @@ public extension DiscordEndpointConsumer where Self: DiscordUserActor {
     func listAutoModRules(
         on guildId: GuildID, 
         callback: (([DiscordAutoModerationRule?], HTTPURLResponse?) -> ())? = nil) {
-            var extraHeaders = [DiscordHeader: String]()
+            let extraHeaders = [DiscordHeader: String]()
             
             let requestCallback: DiscordRequestCallback = { data, response, error in
                 guard let autoModRules: [DiscordAutoModerationRule?] = DiscordJSON.decodeResponse(data: data, response: response) else {
@@ -475,7 +475,7 @@ public extension DiscordEndpointConsumer where Self: DiscordUserActor {
                 endpoint: .autoModRules(guildId: guildId), 
                 token: token, 
                 requestInfo: .get(params: nil, extraHeaders: extraHeaders), 
-                callback: callback
+                callback: requestCallback
             )
     }
     

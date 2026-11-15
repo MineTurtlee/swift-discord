@@ -91,6 +91,9 @@ public struct DiscordPermissions: RawRepresentable, OptionSet, Codable, Hashable
     public static let useSlashCommands = DiscordPermissions(rawValue: 1 << 31)
     /// This user can request to speak in stage channels.
     public static let requestToSpeak = DiscordPermissions(rawValue: 1 << 32)
+    
+    public static let manageEvents = DiscordPermissions(rawValue: 1 << 33)
+    
     /// This user can delete and archive threads, also view all private threads.
     public static let manageThreads = DiscordPermissions(rawValue: 1 << 34)
     /// This user can create and participate in threads.
@@ -99,6 +102,21 @@ public struct DiscordPermissions: RawRepresentable, OptionSet, Codable, Hashable
     public static let usePrivateThreads = DiscordPermissions(rawValue: 1 << 36)
     /// This user can use custom stickers from other servers.
     public static let useExternalStickers = DiscordPermissions(rawValue: 1 << 37)
+    
+    public static let sendMessagesInThreads = DiscordPermissions(rawValue: 1 << 38)
+    public static let useEmbeddedActivities = DiscordPermissions(rawValue: 1 << 39)
+    public static let moderateMembers = DiscordPermissions(rawValue: 1 << 40)
+    public static let viewCreatorMonetizationAnalytics = DiscordPermissions(rawValue: 1 << 41)
+    public static let useSoundboard = DiscordPermissions(rawValue: 1 << 42)
+    public static let createGuildExpressions = DiscordPermissions(rawValue: 1 << 43)
+    public static let createEvents = DiscordPermissions(rawValue: 1 << 44)
+    public static let useExternalSounds = DiscordPermissions(rawValue: 1 << 45)
+    public static let sendVoiceMessages = DiscordPermissions(rawValue: 1 << 46)
+    public static let setVCStatus = DiscordPermissions(rawValue: 1 << 48)
+    public static let sendPolls = DiscordPermissions(rawValue: 1 << 49)
+    public static let useExternalApps = DiscordPermissions(rawValue: 1 << 50)
+    public static let pinMessages = DiscordPermissions(rawValue: 1 << 51)
+    public static let bypassSlowmode = DiscordPermissions(rawValue: 1 << 52)
     
     // MARK: Composite permissions
     

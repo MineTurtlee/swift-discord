@@ -107,6 +107,8 @@ public struct DiscordChannel: Codable, Identifiable, Hashable {
 
     /// The application id of the group DM creator if bot-created.
     public var applicationId: UserID?
+    
+    public var managed: Bool?
 
     /// For guild channels the parent category, for threads the
     /// text channel in which the thread was created.
@@ -144,6 +146,20 @@ public struct DiscordChannel: Codable, Identifiable, Hashable {
     /// Only included when part of the resolved data received on
     /// a slash command interaction.
     public var permissions: DiscordPermissions?
+    
+    public var appPermissions: DiscordPermissions?
+    
+    public var flags: Int?
+    
+    public var totalMessageSent: Int?
+    
+    // public var availableTags: []
+    public var appliedTags: [Snowflake]?
+    
+    // public var defaultReactionEmoji:
+    
+    // TODO: thr ratelim, until end
+    
 
     /// Whether this is a direct message.
     public var isDM: Bool { [.dm, .groupDM].contains(type) }
@@ -168,10 +184,12 @@ public struct DiscordChannelType: RawRepresentable, Codable, Hashable {
     public static let category = DiscordChannelType(rawValue: 4)
     /// A channel that users can follow in their own guild.
     public static let news = DiscordChannelType(rawValue: 5)
+    public static let announcement = DiscordChannelType.news
     /// A channel in which game devs can sell their games on Discord.
-    public static let store = DiscordChannelType(rawValue: 6)
+    // public static let store = DiscordChannelType(rawValue: 6)
     /// A temporary sub-channel in a guild news channel.
     public static let newsThread = DiscordChannelType(rawValue: 10)
+    public static let announcementThread = DiscordChannelType.newsThread
     /// A temporary sub-channel within a guild text channel.
     public static let publicThread = DiscordChannelType(rawValue: 11)
     /// A temporary sub-channel in a guild text channel that is only viewable
@@ -179,6 +197,9 @@ public struct DiscordChannelType: RawRepresentable, Codable, Hashable {
     public static let privateThread = DiscordChannelType(rawValue: 12)
     /// A guild voice channel for hosting events with an audience.
     public static let stageVoice = DiscordChannelType(rawValue: 13)
+    public static let directory = DiscordChannelType(rawValue: 14)
+    public static let forum = DiscordChannelType(rawValue: 15)
+    public static let media = DiscordChannelType(rawValue: 16)
 
     public init(rawValue: Int) {
         self.rawValue = rawValue
