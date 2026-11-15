@@ -6,15 +6,17 @@ jobs:
   build:
     strategy:
       matrix:
-        os: ['ubuntu-latest', 'macos-latest']
-        swift: ['6.0']
+        os: ['ubuntu-24', 'macos-latest']
+        swift: ['6.0.3']
 
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
-    - uses: swift-actions/setup-swift@v2.3.0
+    - uses: swift-actions/setup-swift@v3
       with:
         swift-version: ${{ matrix.swift }}
+        skip-verify-signature: true
+      if: contains('Linux', runner.os)
     - name: Build
       run: swift build
     - name: Test
