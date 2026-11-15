@@ -124,6 +124,9 @@ public typealias ApplicationID = Snowflake
 /// A Snowflake ID representing a Slash Command
 public typealias CommandID = Snowflake
 
+/// A Snowflake ID representing an AutoMod rule
+public typealias AutoModRuleID = Snowflake 
+
 // MARK: Extra snowflake information
 
 extension Snowflake {

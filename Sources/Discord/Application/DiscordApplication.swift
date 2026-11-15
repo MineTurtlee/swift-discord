@@ -33,33 +33,51 @@ public struct DiscordApplication: Codable, Hashable {
         case owner
         case summary
         case verifyKey = "verify_key"
+        case team
         case guildId = "guild_id"
         case primarySkuId = "primary_sku_id"
         case slug
         case coverImage = "cover_image"
         case flags
+        case newFlags = "flags_new"
+        case approximateGuildCount = "approximate_guild_count"
+        case approximateUserInstallCount = "approximate_user_install_count"
+        case approximateUserAuthorizationCount = "approximate_user_authorization_count"
+        case redirectUrls = "redirect_uris"
+        case interactionsEndpointUrl = "interactions_endpoint_url"
+        case roleConnectionsVerificationUrl = "role_connections_verification_url"
+        case eventWebhooksUrl = "event_webhooks_url"
+        case eventWebhooksStatus = "event_webhooks_status"
+        case eventWebhooksTypes = "event_webhook_types"
+        case tags
+        case installParams = "install_params"
+        case integrationTypesConfigs = "integration_types_config"
+        case customInstallUrl = "custom_install_url"
     }
 
     /// The id of the app.
     public var id: Snowflake
 
     /// The name of the app.
-    public var name: String?
+    public var name: String
 
     /// The icon hash of the app.
     public var icon: String?
 
     /// The description of the app
-    public var description: String?
+    public var description: String
 
     /// An array of RPC origin URLs, if enabled.
     public var rpcOrigins: [String]?
 
     /// Whether the bot can be joined by people other than the owner.
-    public var botPublic: Bool?
+    public var botPublic: Bool
 
     /// Whether the bot can only join upon completion of the full OAuth2 grant flow.
-    public var botRequireCodeGrant: Bool?
+    public var botRequireCodeGrant: Bool
+    
+    /// partial user of the app if exists
+    public var bot: DiscordUser?
 
     /// The URL of the app's ToS.
     public var termsOfServiceUrl: URL?
@@ -74,10 +92,16 @@ public struct DiscordApplication: Codable, Hashable {
     public var summary: String?
 
     /// Hex encoded key for verification in interactions.
-    public var verifyKey: String?
+    public var verifyKey: String
 
+    /// team
+    public var team: DiscordTeam?
+    
     /// The guild ID if this is an app sold on Discord.
     public var guildId: GuildID?
+    
+    /// guild (partial obj)
+    public var guild: DiscordGuild? 
 
     /// Game SKU for games sold on Discord.
     public var primarySkuId: Snowflake?
@@ -90,6 +114,47 @@ public struct DiscordApplication: Codable, Hashable {
 
     /// The applications public flags.
     public var flags: DiscordApplicationFlags?
+    
+    /// new flags
+    public var newFlags: String? 
+    
+    /// guild count
+    public var approximateGuildCount: Int?
+    
+    /// user installation count
+    public var approximateUserInstallCount: Int?
+    
+    /// user authorization count, not the same as inst count!!
+    public var approximateUserAuthorizationCount: Int?
+    
+    /// authorization redirect urls
+    public var redirectUrls: [String]?
+    
+    /// interactions endpoint 
+    public var interactionsEndpointUrl: String?
+    
+    /// role connection verification url
+    public var roleConnectionsVerificationUrl: String?
+    
+    /// event webhooks
+    public var eventWebhooksUrl: String?
+    
+    /// event webhooks status
+    public var eventWebhooksStatus: DiscordApplicationEventWebhookStatus?
+    
+    /// event webhooks types
+    public var eventWebhooksTypes: [DiscordApplicationEventWebhookType]?
+    
+    /// tags
+    public var tags: [String]?
+    
+    /// install parameters
+    public var installParams: DiscordApplicationInstallParams?
+    
+    /// Default scopes and permissions for each supported installation context. Value for each key is an integration type configuration object
+    public var integrationTypesConfigs: [DiscordApplicationIntegrationTypes: DiscordIntegrationTypeConfiguration]?
+    
+    public var customInstallUrl: String?
 }
 
 /// Public flags of an application.

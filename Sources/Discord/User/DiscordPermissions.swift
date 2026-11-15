@@ -19,9 +19,12 @@
 import BigInt
 
 /// Represents a Discord Permission. Calculating Permissions involves bitwise operations.
-public struct DiscordPermissions: RawRepresentable, OptionSet, Codable, Hashable {
+public struct DiscordPermissions: RawRepresentable, OptionSet, Codable, Hashable, LosslessStringConvertible, ExpressibleByStringLiteral {
     public var rawValue: BigInt
-
+    public var description: String {
+        String(rawValue)
+    }
+    
     /// This user can create invites.
     public static let createInstantInvite = DiscordPermissions(rawValue: 1 << 0)
     /// This user can kick members.
@@ -96,20 +99,25 @@ public struct DiscordPermissions: RawRepresentable, OptionSet, Codable, Hashable
     public static let usePrivateThreads = DiscordPermissions(rawValue: 1 << 36)
     /// This user can use custom stickers from other servers.
     public static let useExternalStickers = DiscordPermissions(rawValue: 1 << 37)
-
+    
     // MARK: Composite permissions
-
+    
     /// All the channel permissions set to true.
     public static let allChannel = DiscordPermissions(rawValue: 0x33F7FC51)
-
+    
     /// All voice permissions set to true
     public static let voice = DiscordPermissions(rawValue: 0x3F00000)
-
+    
     /// User has all permissions.
     public static let all = DiscordPermissions(UInt64.max) // We may need to bump this in the future
-
+    
     public init() {
         rawValue = 0
+    }
+    
+    public init?(_ desc: String) {
+        guard let value = BigInt(desc) else { return nil }
+        self.init(rawValue: value)
     }
 
     public init(rawValue: BigInt) {
@@ -118,6 +126,10 @@ public struct DiscordPermissions: RawRepresentable, OptionSet, Codable, Hashable
 
     public init(_ value: UInt64) {
         self.init(rawValue: BigInt(value))
+    }
+    
+    public init(stringLiteral v: String) {
+        self.init(rawValue: BigInt(v) ?? 0)
     }
 
     public init(from decoder: Decoder) throws {

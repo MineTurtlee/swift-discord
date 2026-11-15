@@ -26,110 +26,110 @@ fileprivate let logger = Logger(label: "DiscordEndpointGuild")
 public extension DiscordEndpointConsumer where Self: DiscordUserActor {
     /// Default implementation
     func addGuildMemberRole(_ roleId: RoleID,
-                                   to userId: UserID,
-                                   on guildId: GuildID,
-                                   reason: String? = nil,
-                                   callback: ((Bool, HTTPURLResponse?) -> ())?) {
+                            to userId: UserID,
+                            on guildId: GuildID,
+                            reason: String? = nil,
+                            callback: ((Bool, HTTPURLResponse?) -> ())?) {
         var extraHeaders = [DiscordHeader: String]()
-
+        
         if let modifyReason = reason {
             extraHeaders[.auditReason] = modifyReason
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildMemberRole(guild: guildId, user: userId, role: roleId),
                                    token: token,
                                    requestInfo: .put(content: nil, extraHeaders: extraHeaders),
                                    callback: { _, response, _ in callback?(response?.statusCode == 204, response) })
     }
-
+    
     /// Default implementation
     func createGuildChannel(on guildId: GuildID,
-                                   options: DiscordEndpoint.Options.GuildCreateChannel,
-                                   reason: String? = nil,
-                                   callback: ((DiscordChannel?, HTTPURLResponse?) -> ())? = nil) {
+                            options: DiscordEndpoint.Options.GuildCreateChannel,
+                            reason: String? = nil,
+                            callback: ((DiscordChannel?, HTTPURLResponse?) -> ())? = nil) {
         var extraHeaders = [DiscordHeader: String]()
-
+        
         if let modifyReason = reason {
             extraHeaders[.auditReason] = modifyReason
         }
-
+        
         guard let contentData = try? DiscordJSON.encode(options) else { return }
-
+        
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let channel: DiscordChannel = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback?(nil, response)
-
+                
                 return
             }
-
+            
             callback?(channel, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildChannels(guild: guildId),
                                    token: token,
                                    requestInfo: .post(content: .json(contentData), extraHeaders: extraHeaders),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func createGuildRole(on guildId: GuildID,
-                                withOptions options: [DiscordEndpoint.Options.CreateRole] = [],
-                                reason: String? = nil,
-                                callback: @escaping (DiscordRole?, HTTPURLResponse?) -> ()) {
+                         withOptions options: [DiscordEndpoint.Options.CreateRole] = [],
+                         reason: String? = nil,
+                         callback: @escaping (DiscordRole?, HTTPURLResponse?) -> ()) {
         var extraHeaders = [DiscordHeader: String]()
-
+        
         if let modifyReason = reason {
             extraHeaders[.auditReason] = modifyReason
         }
-
+        
         logger.info("Creating a new role on \(guildId)")
         logger.debug("(verbose) Role options \(options)")
-
+        
         guard let contentData = try? DiscordJSON.encode(options) else { return callback(nil, nil) }
-
+        
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let role: DiscordRole = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback(nil, response)
-
+                
                 return
             }
-
+            
             callback(role, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildRoles(guild: guildId),
                                    token: token,
                                    requestInfo: .post(content: .json(contentData), extraHeaders: extraHeaders),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func deleteGuild(_ guildId: GuildID,
-                            callback: ((DiscordGuild?, HTTPURLResponse?) -> ())? = nil) {
+                     callback: ((DiscordGuild?, HTTPURLResponse?) -> ())? = nil) {
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let guild: DiscordGuild = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback?(nil, response)
-
+                
                 return
             }
-
+            
             callback?(guild, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guilds(id: guildId),
                                    token: token,
                                    requestInfo: .delete(content: nil, extraHeaders: nil),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation.
     func getGuildAuditLog(for guildId: GuildID,
                           withOptions options: [DiscordEndpoint.Options.AuditLog],
                           callback: @escaping (DiscordAuditLog?, HTTPURLResponse?) -> ()) {
         logger.debug("Getting audit log for \(guildId)")
-
+        
         var getParams = [String: String]()
-
+        
         for option in options {
             switch option {
             case let .actionType(type):
@@ -139,95 +139,95 @@ public extension DiscordEndpointConsumer where Self: DiscordUserActor {
             case let .limit(i) where i > 0 && i <= 100:
                 getParams["limit"] = String(i)
             case let .userId(id):
-                 getParams["user_id"] = String(id.rawValue)
+                getParams["user_id"] = String(id.rawValue)
             default:
                 continue
             }
         }
-
+        
         let requestCallback: DiscordRequestCallback = {data, response, error in
             guard let log: DiscordAuditLog = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback(nil, response)
-
+                
                 return
             }
-
+            
             logger.debug("Got audit log for \(guildId)")
-
+            
             callback(log, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildAuditLog(id: guildId),
                                    token: token,
                                    requestInfo: .get(params: getParams, extraHeaders: nil),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func getGuildBans(for guildId: GuildID,
-                             callback: @escaping ([DiscordBan], HTTPURLResponse?) -> ()) {
+                      callback: @escaping ([DiscordBan], HTTPURLResponse?) -> ()) {
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let bans: [DiscordBan] = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback([], response)
-
+                
                 return
             }
-
+            
             logger.debug("Got guild bans \(bans)")
             callback(bans, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildBans(guild: guildId),
                                    token: token,
                                    requestInfo: .get(params: nil, extraHeaders: nil),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func getGuildChannels(_ guildId: GuildID,
-                                 callback: @escaping ([DiscordChannel], HTTPURLResponse?) -> ()) {
+                          callback: @escaping ([DiscordChannel], HTTPURLResponse?) -> ()) {
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let channels: [DiscordChannel] = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback([], response)
-
+                
                 return
             }
-
+            
             callback(channels, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildChannels(guild: guildId),
                                    token: token,
                                    requestInfo: .get(params: nil, extraHeaders: nil),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func getGuildMember(by id: UserID,
-                               on guildId: GuildID,
-                               callback: @escaping (DiscordGuildMember?, HTTPURLResponse?) -> ()) {
+                        on guildId: GuildID,
+                        callback: @escaping (DiscordGuildMember?, HTTPURLResponse?) -> ()) {
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let member: DiscordGuildMember = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback(nil, response)
-
+                
                 return
             }
-
+            
             callback(member, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildMember(guild: guildId, user: id),
                                    token: token,
                                    requestInfo: .get(params: nil, extraHeaders: nil),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func getGuildMembers(on guildId: GuildID,
-                                options: [DiscordEndpoint.Options.GuildGetMembers],
-                                callback: @escaping ([DiscordGuildMember], HTTPURLResponse?) -> ()) {
+                         options: [DiscordEndpoint.Options.GuildGetMembers],
+                         callback: @escaping ([DiscordGuildMember], HTTPURLResponse?) -> ()) {
         var getParams: [String: String] = [:]
-
+        
         for option in options {
             switch option {
             case let .after(highest):
@@ -236,222 +236,348 @@ public extension DiscordEndpointConsumer where Self: DiscordUserActor {
                 getParams["limit"] = String(number)
             }
         }
-
+        
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let members: [DiscordGuildMember] = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback([], response)
-
+                
                 return
             }
-
+            
             callback(members, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildMembers(guild: guildId),
                                    token: token,
                                    requestInfo: .get(params: getParams, extraHeaders: nil),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func getGuildRoles(for guildId: GuildID,
-                              callback: @escaping ([DiscordRole], HTTPURLResponse?) -> ()) {
+                       callback: @escaping ([DiscordRole], HTTPURLResponse?) -> ()) {
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let roles: [DiscordRole] = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback([], response)
-
+                
                 return
             }
-
+            
             callback(roles, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildRoles(guild: guildId),
                                    token: token,
                                    requestInfo: .get(params: nil, extraHeaders: nil),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func guildBan(userId: UserID,
-                         on guildId: GuildID,
-                         deleteMessageDays: Int = 7,
-                         reason: String? = nil,
-                         callback: ((Bool, HTTPURLResponse?) -> ())? = nil) {
+                  on guildId: GuildID,
+                  deleteMessageDays: Int = 7,
+                  reason: String? = nil,
+                  callback: ((Bool, HTTPURLResponse?) -> ())? = nil) {
         guard let contentData = try? DiscordJSON.encode(["delete-message-days": deleteMessageDays]) else { return }
         var extraHeaders = [DiscordHeader: String]()
-
+        
         if let modifyReason = reason {
             extraHeaders[.auditReason] = modifyReason
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildBanUser(guild: guildId, user: userId),
                                    token: token,
                                    requestInfo: .put(content: .json(contentData), extraHeaders: extraHeaders),
                                    callback: { _, response, _ in callback?(response?.statusCode == 204, response) })
     }
-
+    
     /// Default implementation
     func modifyGuild(_ guildId: GuildID,
-                            options: DiscordEndpoint.Options.ModifyGuild,
-                            reason: String? = nil,
-                            callback: ((DiscordGuild?, HTTPURLResponse?) -> ())? = nil) {
+                     options: DiscordEndpoint.Options.ModifyGuild,
+                     reason: String? = nil,
+                     callback: ((DiscordGuild?, HTTPURLResponse?) -> ())? = nil) {
         var extraHeaders = [DiscordHeader: String]()
-
+        
         if let modifyReason = reason {
             extraHeaders[.auditReason] = modifyReason
         }
-
+        
         guard let contentData = try? DiscordJSON.encode(options) else { return }
-
+        
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let guild: DiscordGuild = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback?(nil, response)
-
+                
                 return
             }
-
+            
             callback?(guild, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guilds(id: guildId),
                                    token: token,
                                    requestInfo: .patch(content: .json(contentData), extraHeaders: extraHeaders),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func modifyGuildChannelPositions(on guildId: GuildID,
-                                            channelPositions: [[String: Any]],
-                                            callback: (([DiscordChannel], HTTPURLResponse?) -> ())? = nil) {
+                                     channelPositions: [[String: Any]],
+                                     callback: (([DiscordChannel], HTTPURLResponse?) -> ())? = nil) {
         guard let contentData = try? DiscordJSON.encode(GenericEncodableArray(channelPositions)) else { return }
-
+        
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let channels: [DiscordChannel] = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback?([], response)
-
+                
                 return
             }
-
+            
             callback?(channels, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildChannels(guild: guildId),
                                    token: token,
                                    requestInfo: .patch(content: .json(contentData), extraHeaders: nil),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func modifyGuildMember(_ id: UserID, on guildId: GuildID,
                            options: DiscordEndpoint.Options.ModifyMember,
                            reason: String? = nil,
                            callback: ((Bool, HTTPURLResponse?) -> ())? = nil) {
         var extraHeaders = [DiscordHeader: String]()
-
+        
         if let modifyReason = reason {
             extraHeaders[.auditReason] = modifyReason
         }
-
+        
         guard let contentData = try? DiscordJSON.encode(options) else { return }
-
+        
         logger.debug("Modifying guild member \(id) with options: \(options) on \(guildId)")
-
+        
         rateLimiter.executeRequest(endpoint: .guildMember(guild: guildId, user: id),
                                    token: token,
                                    requestInfo: .patch(content: .json(contentData), extraHeaders: extraHeaders),
                                    callback: { _, response, _ in callback?(response?.statusCode == 204, response) })
     }
-
+    
     /// Default implementation
     func modifyGuildRole(_ role: DiscordRole,
-                                on guildId: GuildID,
-                                reason: String? = nil,
-                                callback: ((DiscordRole?, HTTPURLResponse?) -> ())? = nil) {
+                         on guildId: GuildID,
+                         reason: String? = nil,
+                         callback: ((DiscordRole?, HTTPURLResponse?) -> ())? = nil) {
         guard let contentData = try? DiscordJSON.encode(role) else { return }
         var extraHeaders = [DiscordHeader: String]()
-
+        
         if let modifyReason = reason {
             extraHeaders[.auditReason] = modifyReason
         }
-
+        
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let role: DiscordRole = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback?(nil, response)
-
+                
                 return
             }
-
+            
             callback?(role, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildRoles(guild: guildId),
                                    token: token,
                                    requestInfo: .patch(content: .json(contentData), extraHeaders: extraHeaders),
                                    callback: requestCallback)
     }
-
+    
     /// Default implementation
     func removeGuildBan(for userId: UserID,
-                               on guildId: GuildID,
-                               reason: String? = nil,
-                               callback: ((Bool, HTTPURLResponse?) -> ())? = nil) {
+                        on guildId: GuildID,
+                        reason: String? = nil,
+                        callback: ((Bool, HTTPURLResponse?) -> ())? = nil) {
         logger.info("Unbanning \(userId) on \(guildId)")
-
+        
         var extraHeaders = [DiscordHeader: String]()
-
+        
         if let modifyReason = reason {
             extraHeaders[.auditReason] = modifyReason
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildBanUser(guild: guildId, user: userId),
                                    token: token,
                                    requestInfo: .delete(content: nil, extraHeaders: extraHeaders),
                                    callback: { _, response, _ in callback?(response?.statusCode == 204, response) })
     }
-
+    
     /// Default implementation.
     func removeGuildMemberRole(_ roleId: RoleID,
-                                      from userId: UserID,
-                                      on guildId: GuildID,
-                                      reason: String? = nil,
-                                      callback: ((Bool, HTTPURLResponse?) -> ())?) {
+                               from userId: UserID,
+                               on guildId: GuildID,
+                               reason: String? = nil,
+                               callback: ((Bool, HTTPURLResponse?) -> ())?) {
         var extraHeaders = [DiscordHeader: String]()
-
+        
         if let modifyReason = reason {
             extraHeaders[.auditReason] = modifyReason
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildMemberRole(guild: guildId, user: userId, role: roleId),
                                    token: token,
                                    requestInfo: .delete(content: nil, extraHeaders: extraHeaders),
                                    callback: { _, response, _ in callback?(response?.statusCode == 204, response) })
     }
-
+    
     /// Default implementation
     func removeGuildRole(_ roleId: RoleID,
-                                on guildId: GuildID,
-                                reason: String? = nil,
-                                callback: ((DiscordRole?, HTTPURLResponse?) -> ())? = nil) {
+                         on guildId: GuildID,
+                         reason: String? = nil,
+                         callback: ((DiscordRole?, HTTPURLResponse?) -> ())? = nil) {
         var extraHeaders = [DiscordHeader: String]()
-
+        
         if let modifyReason = reason {
             extraHeaders[.auditReason] = modifyReason
         }
-
+        
         let requestCallback: DiscordRequestCallback = { data, response, error in
             guard let role: DiscordRole = DiscordJSON.decodeResponse(data: data, response: response) else {
                 callback?(nil, response)
-
+                
                 return
             }
-
+            
             callback?(role, response)
         }
-
+        
         rateLimiter.executeRequest(endpoint: .guildRole(guild: guildId, role: roleId),
                                    token: token,
                                    requestInfo: .delete(content: nil, extraHeaders: extraHeaders),
                                    callback: requestCallback)
+    }
+    
+    // MARK: AutoModeration addition
+    
+    func listAutoModRules(
+        on guildId: GuildID, 
+        callback: (([DiscordAutoModerationRule?], HTTPURLResponse?) -> ())? = nil) {
+            var extraHeaders = [DiscordHeader: String]()
+            
+            let requestCallback: DiscordRequestCallback = { data, response, error in
+                guard let autoModRules: [DiscordAutoModerationRule?] = DiscordJSON.decodeResponse(data: data, response: response) else {
+                    callback?([], response)
+                    return
+                }
+                
+                callback?(autoModRules, response)
+            }
+            
+            rateLimiter.executeRequest(
+                endpoint: .autoModRules(guildId: guildId), 
+                token: token, 
+                requestInfo: .get(params: nil, extraHeaders: extraHeaders), 
+                callback: callback
+            )
+    }
+    
+    func getAutoModRule(
+        _ id: AutoModRuleID,
+        on guildId: GuildID,
+        callback: ((DiscordAutoModerationRule?, HTTPURLResponse?) -> ())? = nil) {
+            var extraHeaders = [DiscordHeader: String]()
+            
+            let requestCallback: DiscordRequestCallback = { data, response, error in 
+                guard let autoModRule: DiscordAutoModerationRule? = DiscordJSON.decodeResponse(data: data, response: response) else {
+                    callback?(nil, response)
+                    return
+                }
+                
+                callback?(autoModRule, response)
+            }
+            
+            rateLimiter.executeRequest(endpoint: .autoModRules(guildId: guildId), token: token, requestInfo: .get(params: nil, extraHeaders: extraHeaders), callback: requestCallback)
+    }
+    
+    func createAutoModRule(
+        on guildId: GuildID,
+        withOptions options: [DiscordEndpoint.Options.CreateAutoModerationRule],
+        reason: String?,
+        
+        callback: ((DiscordAutoModerationRule?, HTTPURLResponse?) -> ())? = nil
+    ) {
+        var extraHeaders = [DiscordHeader : String]()
+        
+        if let reason {
+            extraHeaders[.auditReason] = reason
+        }
+        
+        guard let contentData = try? DiscordJSON.encode(options) else { return }
+        
+        let requestCallback: DiscordRequestCallback = { data, response, error in
+            guard let autoModRule: DiscordAutoModerationRule? = DiscordJSON.decodeResponse(data: data, response: response) else {
+                callback?(nil, response)
+                return
+            }
+            
+            callback?(autoModRule, response)
+        }
+        
+        rateLimiter.executeRequest(endpoint: .autoModRules(guildId: guildId), token: token, requestInfo: .post(content: .json(contentData), extraHeaders: extraHeaders), callback: requestCallback)
+    }
+    
+    func deleteAutoModRule(
+        _ id: AutoModRuleID,
+        on guildId: GuildID,
+        reason: String?,
+        
+        callback: ((DiscordAutoModerationRule?, HTTPURLResponse?) -> ())? = nil,
+    ) {
+        var extraHeaders = [DiscordHeader: String]()
+        
+        if let reason {
+            extraHeaders[.auditReason] = reason
+        }
+        
+        let requestCallback: DiscordRequestCallback = { data, response, error in
+            guard let rule: DiscordAutoModerationRule? = DiscordJSON.decodeResponse(data: data, response: response) else {
+                callback?(nil, response)
+                return
+            }
+            
+            callback?(rule, response)
+        }
+        
+        rateLimiter.executeRequest(endpoint: .autoModRule(id: id, guildId: guildId), token: token, requestInfo: .delete(content: nil, extraHeaders: extraHeaders), callback: requestCallback)
+    }
+    
+    func modifyAutoModerationRule(
+        _ id: AutoModRuleID,
+        on guildId: GuildID,
+        withOptions options: [DiscordEndpoint.Options.ModifyAutoModerationRule],
+        reason: String?,
+        
+        callback: ((DiscordAutoModerationRule?, HTTPURLResponse?) -> ())? = nil
+    ) {
+        var extraHeaders = [DiscordHeader: String]()
+        
+        if let reason {
+            extraHeaders[.auditReason] = reason
+        }
+        
+        guard let content = try? DiscordJSON.encode(options) else { return }
+        
+        let requestCallback: DiscordRequestCallback = { data, response, error in
+            guard let rule: DiscordAutoModerationRule? = DiscordJSON.decodeResponse(data: data, response: response) else {
+                callback?(nil, response)
+                return
+            }
+            
+            callback?(rule, response)
+        }
+        
+        rateLimiter.executeRequest(
+            endpoint: .autoModRule(id: id, guildId: guildId), 
+            token: token, 
+            requestInfo: .patch(content: .json(content), extraHeaders: extraHeaders), 
+            callback: requestCallback)
     }
 }

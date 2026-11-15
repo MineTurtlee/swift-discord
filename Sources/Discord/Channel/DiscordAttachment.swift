@@ -28,6 +28,14 @@ public struct DiscordAttachment: Identifiable, Codable, Hashable {
         case size
         case url
         case width
+        
+        case title, description, placeholder, ephemeral, waveform, flags
+        case contentType = "content_type"
+        case placeholderVersion = "placeholder_version"
+        case duration = "duration_secs"
+        case clipParticipants = "clip_participants"
+        case clipCreatedAt = "clip_created_at"
+        case application
     }
 
     // MARK: Properties
@@ -37,6 +45,30 @@ public struct DiscordAttachment: Identifiable, Codable, Hashable {
 
     /// The name of the file.
     public var filename: String
+    
+    public var title: String?
+    
+    public var description: String?
+    
+    public var contentType: String?
+    
+    public var placeholder: String?
+    
+    public var placeholderVersion: Int
+    
+    public var ephemeral: Bool?
+    
+    public var duration: Float?
+    
+    public var waveform: String?
+    
+    public var flags: Int?
+    
+    public var clipParticipants: [DiscordUser]?
+    
+    public var clipCreatedAt: Date?
+    
+    public var application: DiscordApplication?
 
     /// The height, if this is an image.
     public var height: Int? = nil

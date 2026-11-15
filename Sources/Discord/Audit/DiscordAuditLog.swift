@@ -23,9 +23,21 @@ public class DiscordAuditLog: Decodable {
         case auditLogEntries = "audit_log_entries"
         case users
         case webhooks
+        case applicationCommands = "application_commands"
+        case threads
     }
 
     // MARK: Properties
+    
+    public let applicationCommands: [DiscordApplicationCommand]
+    
+    // public let autoModRules:
+    
+    // public let guildScheduledEvents: 
+    
+    // public let integrations: 
+    
+    public let threads: [DiscordChannel]
 
     /// List of audit log entries.
     public let auditLogEntries: [DiscordAuditLogEntry]

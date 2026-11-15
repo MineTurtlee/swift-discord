@@ -192,6 +192,30 @@ public enum DiscordEndpoint: CustomStringConvertible {
     case interactionsCallback(interactionId: InteractionID, interactionToken: String)
     /* End Interactions */
 
+    /* AutoMod */
+    /* case autoModRule(
+        id: AutoModRuleID?,
+        guildId: GuildID,
+        name: String,
+        eventType: DiscordAutoModerationEventType.RawValue,
+        triggerType: DiscordAutoModerationTriggerType.RawValue,
+        triggerMetadata: DiscordAutoModerationTriggerMetadata?,
+        actions: [DiscordAutoModerationAction],
+        enabled: Bool?,
+        exemptRoles: [RoleID],
+        exemptChannels: [ChannelID],
+        reason: String?
+    ) */
+    
+    case autoModRule(
+        id: AutoModRuleID,
+        guildId: GuildID
+    )
+    
+    case autoModRules(
+        guildId: GuildID
+    )
+    
     var combined: String {
         return DiscordEndpoint.baseURL.description + description
     }
@@ -307,11 +331,11 @@ public extension DiscordEndpoint {
         switch self {
         case .baseURL:
             return "https://discord.com/api/v\(discordAPIVersion)"
-
-        /* Channels */
+            
+            /* Channels */
         case let .channel(id):
             return "/channels/\(id)"
-        // Messages
+            // Messages
         case let .messages(channel):
             return "/channels/\(channel)/messages"
         case let .bulkMessageDelete(channel):
@@ -330,69 +354,69 @@ public extension DiscordEndpoint {
             return "/channels/\(channel)/thread-members/@me"
         case let .userThreadMember(channel, user):
             return "/channels/\(channel)/thread-members/\(user)"
-        // Reactions
+            // Reactions
         case let .reactions(channel, message, emoji):
             return "/channels/\(channel)/messages/\(message)/reactions/\(emoji)/@me"
         case let .userReactions(channel, message, emoji, user):
             return "/channels/\(channel)/messages/\(message)/reactions/\(emoji)/\(user)"
-        // Permissions
+            // Permissions
         case let .permissions(channel):
             return "/channels/\(channel)/permissions"
         case let .channelPermission(channel, overwrite):
             return "/channels/\(channel)/permissions/\(overwrite)"
-        // Invites
+            // Invites
         case let .invites(code):
             return "/invites/\(code)"
         case let .channelInvites(channel):
             return "/channels/\(channel)/invites"
-        // Pinned Messages
+            // Pinned Messages
         case let .pins(channel):
             return "/channels/\(channel)/pins"
         case let .pinnedMessage(channel, message):
             return "/channels/\(channel)/pins/\(message)"
-        // Webhooks
+            // Webhooks
         case let .channelWebhooks(channel):
             return "/channels/\(channel)/webhooks"
-        /* End Channels */
-
-        /* Guilds */
+            /* End Channels */
+            
+            /* Guilds */
         case let .guilds(id):
             return "/guilds/\(id)"
         case let .guildAuditLog(id):
             return "/guilds/\(id)/audit-logs"
-        // Guild Channels
+            // Guild Channels
         case let .guildChannels(guild):
             return "/guilds/\(guild)/channels"
-        // Guild Members
+            // Guild Members
         case let .guildMembers(guild):
             return "/guilds/\(guild)/members"
         case let .guildMember(guild, user):
             return "/guilds/\(guild)/members/\(user)"
         case let .guildMemberRole(guild, user, role):
             return "/guilds/\(guild)/members/\(user)/roles/\(role)"
-        // Guild Bans
+            // Guild Bans
         case let .guildBans(guild):
             return "/guilds/\(guild)/bans"
         case let .guildBanUser(guild, user):
             return "/guilds/\(guild)/bans/\(user)"
-        // Guild Roles
+            // Guild Roles
         case let .guildRoles(guild):
             return "/guilds/\(guild)/roles"
         case let .guildRole(guild, role):
             return "/guilds/\(guild)/roles/\(role)"
-        // Webhooks
+            // Webhooks
         case let .guildWebhooks(guild):
             return "/guilds/\(guild)/webhooks"
-        /* End Guilds */
-
-        /* User */
+            /* End Guilds */
+            
+            /* User */
         case .userChannels:
             return "/users/@me/channels"
         case .userGuilds:
             return "/users/@me/guilds"
-        /* End User */
-
-        /* Webhooks */
+            /* End User */
+            
+            /* Webhooks */
         case let .webhook(id):
             return "/webhooks/\(id)"
         case let .webhookWithToken(id, token):
@@ -401,16 +425,16 @@ public extension DiscordEndpoint {
             return "/webhooks/\(id)/\(token)/slack"
         case let .webhookGithub(id, token):
             return "/webhooks/\(id)/\(token)/github"
-        /* End Webhooks */
-
-        /* Emoji */
+            /* End Webhooks */
+            
+            /* Emoji */
         case let .guildEmojis(guild):
             return "/guilds/\(guild)/emojis"
         case let .guildEmoji(guild, emoji):
             return "/guilds/\(guild)/emojis/\(emoji)"
-        /* End Emoji */
-
-        /* Application */
+            /* End Emoji */
+            
+            /* Application */
         case let .globalApplicationCommands(applicationId):
             return "/applications/\(applicationId)/commands"
         case let .globalApplicationCommand(applicationId, commandId):
@@ -419,12 +443,17 @@ public extension DiscordEndpoint {
             return "/applications/\(applicationId)/guilds/\(guildId)/commands"
         case let .guildApplicationCommand(applicationId, guildId, commandId):
             return "/applications/\(applicationId)/guilds/\(guildId)/commands/\(commandId)"
-        /* End Application */
-
-        /* Interactions */
+            /* End Application */
+            
+            /* Interactions */
         case let .interactionsCallback(interactionId, interactionToken):
             return "/interactions/\(interactionId)/\(interactionToken)/callback"
-        /* End Interactions */
+            /* End Interactions */
+            
+        case .autoModRule(id: let id, guildId: let guildId):
+            return "/guilds/\(guildId)/auto-moderation/rules/\(id)"
+        case .autoModRules(guildId: let guildId):
+            return "/guilds/\(guildId)/auto-moderation/rules"
         }
     }
 
@@ -442,10 +471,10 @@ public extension DiscordEndpoint {
         switch self {
         case .baseURL:
             fatalError("Attempted to get rate limit key for base URL")
-        /* Channels */
+            /* Channels */
         case let .channel(id):
             return DiscordRateLimitKey(id: id, urlParts: [.channels, .channelID])
-        // Messages
+            // Messages
         case let .messages(channel):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .messages])
         case let .bulkMessageDelete(channel):
@@ -456,7 +485,7 @@ public extension DiscordEndpoint {
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .messagesDelete, .messageID])
         case let .typing(channel):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .typing])
-        // Threads
+            // Threads
         case let .channelMessageThreads(channel, _):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .messages, .messageID, .threads])
         case let .channelThreads(channel):
@@ -465,69 +494,69 @@ public extension DiscordEndpoint {
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .threadMembers, .me])
         case let .userThreadMember(channel, _):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .threadMembers, .userID])
-        // Reactions
+            // Reactions
         case let .reactions(channel, _, _):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .messages, .messageID, .reactions, .emoji, .me])
         case let .userReactions(channel, _, _, _):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .messages, .messageID, .reactions, .emoji, .userID])
-        // Permissions
+            // Permissions
         case let .permissions(channel):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .permissions])
         case let .channelPermission(channel, _):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .permissions, .overwriteID])
-        // Invites
+            // Invites
         case .invites:
             return DiscordRateLimitKey(urlParts: [.invites, .inviteCode])
         case let .channelInvites(channel):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .invites])
-        // Pinned Messages
+            // Pinned Messages
         case let .pins(channel):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .pins])
         case let .pinnedMessage(channel, _):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .pins, .messageID])
-        // Webhooks
+            // Webhooks
         case let .channelWebhooks(channel):
             return DiscordRateLimitKey(id: channel, urlParts: [.channels, .channelID, .webhooks])
-        /* End Channels */
-
-        /* Guilds */
+            /* End Channels */
+            
+            /* Guilds */
         case let .guilds(id):
             return DiscordRateLimitKey(id: id, urlParts: [.guilds, .guildID])
         case let .guildAuditLog(id):
             return DiscordRateLimitKey(id: id, urlParts: [.guilds, .guildID, .auditLog])
-        // Guild Channels
+            // Guild Channels
         case let .guildChannels(guild):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .channels])
-        // Guild Members
+            // Guild Members
         case let .guildMembers(guild):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .members])
         case let .guildMember(guild, _):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .members, .userID])
         case let .guildMemberRole(guild, _, _):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .members, .userID, .roles, .roleID])
-        // Guild Bans
+            // Guild Bans
         case let .guildBans(guild):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .bans])
         case let .guildBanUser(guild, _):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .bans, .userID])
-        // Guild Roles
+            // Guild Roles
         case let .guildRoles(guild):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .roles])
         case let .guildRole(guild, _):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .roles, .roleID])
-        // Webhooks
+            // Webhooks
         case let .guildWebhooks(guild):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .webhooks])
-        /* End Guilds */
-
-        /* User */
+            /* End Guilds */
+            
+            /* User */
         case .userChannels:
             return DiscordRateLimitKey(urlParts: [.users, .userID, .channels])
         case .userGuilds:
             return DiscordRateLimitKey(urlParts: [.users, .userID, .guilds])
-        /* End User */
-
-        /* Webhooks */
+            /* End User */
+            
+            /* Webhooks */
         case .webhook:
             return DiscordRateLimitKey(urlParts: [.webhooks, .webhookID])
         case .webhookWithToken:
@@ -536,15 +565,15 @@ public extension DiscordEndpoint {
             return DiscordRateLimitKey(urlParts: [.webhooks, .webhookID, .webhookToken, .slack])
         case .webhookGithub:
             return DiscordRateLimitKey(urlParts: [.webhooks, .webhookID, .webhookToken, .github])
-        /* End Webhooks */
-
-        /* Emoji */
+            /* End Webhooks */
+            
+            /* Emoji */
         case let .guildEmojis(guild):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .emojis])
         case let .guildEmoji(guild, _):
             return DiscordRateLimitKey(id: guild, urlParts: [.guilds, .guildID, .emojis, .emojiID])
-
-        /* Applications */
+            
+            /* Applications */
         case let .globalApplicationCommands(applicationId):
             return DiscordRateLimitKey(id: applicationId, urlParts: [.applications, .applicationID, .commands])
         case let .globalApplicationCommand(applicationId, _):
@@ -553,12 +582,19 @@ public extension DiscordEndpoint {
             return DiscordRateLimitKey(id: applicationId, urlParts: [.applications, .applicationID, .guilds, .guildID, .commands])
         case let .guildApplicationCommand(applicationId, _, _):
             return DiscordRateLimitKey(id: applicationId, urlParts: [.applications, .applicationID, .guilds, .guildID, .commands, .commandID])
-        /* End Applications */
-
-        /* Interactions */
+            /* End Applications */
+            
+            /* Interactions */
         case let .interactionsCallback(interactionId, _):
             return DiscordRateLimitKey(id: interactionId, urlParts: [.interactions, .interactionID, .interactionToken, .callback])
-        /* End Interactions */
+            /* End Interactions */
+            
+        case .autoModRule(id: let id, guildId: let guildId):
+            return DiscordRateLimitKey(id: id, urlParts: [
+                .autoModRuleID, .guildID
+            ])
+        case .autoModRules(guildId: let guildId):
+            return DiscordRateLimitKey(urlParts: .guildID)
         }
     }
 
@@ -955,6 +991,70 @@ public extension DiscordEndpoint {
                 self.name = name
                 self.autoArchiveDuration = autoArchiveDuration
                 self.type = type
+            }
+        }
+        
+        public struct CreateAutoModerationRule: Codable {
+            public let name: String
+            public let eventType: DiscordAutoModerationEventType
+            public let triggerType: DiscordAutoModerationTriggerType
+            public let triggerMetadata: DiscordAutoModerationTriggerMetadata?
+            public let actions: [DiscordAutoModerationAction]
+            public let enabled: Bool?
+            public let exemptRoles: [RoleID]?
+            public let exemptChannels: [ChannelID]?
+
+            init(name: String, eventType: DiscordAutoModerationEventType, triggerType: DiscordAutoModerationTriggerType, triggerMetadata: DiscordAutoModerationTriggerMetadata?, actions: [DiscordAutoModerationAction], enabled: Bool?, exemptRoles: [RoleID]?, exemptChannels: [ChannelID]?) {
+                self.name = name
+                self.eventType = eventType
+                self.triggerType = triggerType
+                self.triggerMetadata = triggerMetadata
+                self.actions = actions
+                self.enabled = enabled
+                self.exemptRoles = exemptRoles
+                self.exemptChannels = exemptChannels
+            }
+            
+            enum CodingKeys: String, CodingKey {
+                case name
+                case eventType = "event_type"
+                case triggerType = "trigger_type"
+                case triggerMetadata = "trigger_metadata"
+                case actions
+                case enabled
+                case exemptRoles = "exempt_roles"
+                case exemptChannels = "exempt_channels"
+            }
+        }
+        
+        public struct ModifyAutoModerationRule: Codable {
+            public let name: String?
+            public let eventType: DiscordAutoModerationEventType?
+            public let triggerType: DiscordAutoModerationTriggerType?
+            public let triggerMetadata: DiscordAutoModerationTriggerMetadata?
+            public let actions: [DiscordAutoModerationAction]?
+            public let exemptRoles: [RoleID]?
+            public let exemptChannels: [ChannelID]?
+
+            init(name: String?, eventType: DiscordAutoModerationEventType?, triggerType: DiscordAutoModerationTriggerType?, triggerMetadata: DiscordAutoModerationTriggerMetadata?, actions: [DiscordAutoModerationAction]?, exemptRoles: [RoleID]?, exemptChannels: [ChannelID]?) {
+                self.name = name
+                self.eventType = eventType
+                self.triggerType = triggerType
+                self.triggerMetadata = triggerMetadata
+                self.actions = actions
+                self.exemptRoles = exemptRoles
+                self.exemptChannels = exemptChannels
+            }
+            
+            enum CodingKeys: String, CodingKey {
+                case name
+                case eventType = "event_type"
+                case triggerType = "trigger_type"
+                case triggerMetadata = "trigger_metadata"
+                case actions
+                
+                case exemptRoles = "exempt_roles"
+                case exemptChannels = "exempt_channels"
             }
         }
     }
