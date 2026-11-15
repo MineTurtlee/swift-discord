@@ -16,6 +16,7 @@ jobs:
       with:
         swift-version: ${{ matrix.swift }}
         skip-verify-signature: true
+      if: contains('Linux', runner.os)
     - name: Build
       run: swift build
     - name: Test
