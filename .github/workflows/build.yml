@@ -12,9 +12,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
-    - uses: swift-actions/setup-swift@v2.3.0
+    - uses: swift-actions/setup-swift@v3.0
       with:
         swift-version: ${{ matrix.swift }}
+        skip-verify-signature: true
     - name: Build
       run: swift build
     - name: Test
